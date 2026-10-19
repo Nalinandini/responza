@@ -3,7 +3,10 @@ import os
 import re
 from datetime import datetime, timezone
 
-DEFAULT_DB_PATH = os.environ.get("DATABASE_PATH", "responza.db")
+DEFAULT_DB_PATH = os.environ.get(
+    "DATABASE_PATH",
+    "/tmp/responza.db" if os.environ.get("VERCEL") else "responza.db"
+)
 
 def mask_phone_number(phone: str) -> str:
     """
