@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="{{ language or 'en' }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ selected }} — Emergency Guidance</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container container-dark">
+    <h2>
+      🚨 {{ selected }}
+    </h2>
+    <p class="subtitle" style="color: #f87171;">
+      {% if language == 'te' %}తక్షణ అత్యవసర చర్యలు
+      {% elif language == 'hi' %}तत्काल आपातकालीन कदम
+      {% else %}Immediate Action Steps
+      {% endif %}
+    </p>
+
+    <!-- Ordered Steps List -->
+    <ol class="steps-list">
+      {% for step in steps %}
+        <li>{{ step }}</li>
+      {% endfor %}
+    </ol>
+
+    <!-- Interactive Geolocation Card -->
+    <div class="geo-card" id="geoCard">
+      <div class="geo-header">
+        <span class="geo-title">
+          🛰 
+          {% if language == 'te' %}GPS లొకేషన్ స్థితి
+          {% elif language == 'hi' %}GPS स्थान स्थिति
+          {% else %}GPS Location Status
+          {% endif %}
+        </span>
+        <button type="button" class="btn-retry-geo" id="retryGeoBtn" onclick="requestGeolocation();">
+          🔄 
+          {% if language == 'te' %}మళ్లీ ప్రయత్నించు
+          {% elif language == 'hi' %}पुनः प्रयास करें
+          {% else %}Retry GPS
+          {% endif %}
+        </button>
+      </div>
+
+      <div class="geo-status" id="geoStatusText">
+        ⏳ 
+        {% if language == 'te' %}లొకేషన్ అనుమతిని అభ్యర్థిస్తోంది...
+        {% elif language == 'hi' %}स्थान अनुमति का अनुरोध किया जा रहा है...
+        {% else %}Requesting location permission from browser...
+        {% endif %}
+      </div>
+
+      <div id="geoCoordsBox" style="display: none;">
+        <span class="geo-coords" id="geoCoordsText"></span>
+        <div style="margin-top: 0.35rem;">
+          <a id="geoMapLink" href="#" target="_blank" rel="noopener noreferrer" style="color: #38bdf8; font-size: 0.8rem; text-decoration: underline;">
+            🗺 View on Google Maps
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions Stack -->
+    <div class="button-stack">
+      <!-- SMS Alert Form -->
+      <form action="/send_sms" method="POST" id="smsForm">
+        <input type="hidden" name="emergency" value="{{ selected }}">
+        <input type="hidden" name="language" value="{{ language }}">
+        <input type="hidden" id="latitude" name="latitude" value="">
+        <input type="hidden" id="longitude" name="longitude" value="">
+
+        <button class="btn btn-sms" type="submit" id="sendBtn" disabled>
+          🛰 
+          {% if language == 'te' %}లొకేషన్‌తో SMS అలర్ట్ పంపు
+          {% elif language == 'hi' %}स्थान के साथ SMS अलर्ट भेजें
+          {% else %}Send SMS Alert with Location
+          {% endif %}
+        </button>
+      </form>
+
+      <!-- Instant Phone Dial Button -->
+      <a class="btn btn-call" href="{{ call_link }}">
+        📞 
+        {% if language == 'te' %}తక్షణమే కాల్ చేయండి
+        {% elif language == 'hi' %}तुरंत कॉल करें
+        {% else %}Call Emergency Now
+        {% endif %}
+      </a>
+    </div>
+
+    <!-- Navigation Back to Home (Not Splash) -->
+    <div style="margin-top: 1.5rem; display: flex; justify-content: space-between; font-size: 0.85rem;">
+      <a class="nav-link" href="/home">
+        ⬅ 
+        {% if language == 'te' %}హోమ్‌కు వెళ్ళు
+        {% elif language == 'hi' %}मुख्य पृष्ठ पर जाएँ
+        {% else %}Back to Home
+        {% endif %}
+      </a>
+      <a class="nav-link" href="/history">📜 Incident History</a>
+    </div>
+  </div>
+
+  <script>
+    const smsButton = document.getElementById("sendBtn");
+    const statusText = document.getElementById("geoStatusText");
+    const coordsBox = document.getElementById("geoCoordsBox");
+    const coordsText = document.getElementById("geoCoordsText");
+    const mapLink = document.getElementById("geoMapLink");
+    const latInput = document.getElementById("latitude");
+    const lonInput = document.getElementById("longitude");
+
+    const lang = "{{ language or 'en' }}";
+
+    function updateStatus(message, isSuccess = false, isError = false) {
+      statusText.innerHTML = message;
+      if (isError) {
+        statusText.style.color = "#fca5a5";
+      } else if (isSuccess) {
+        statusText.style.color = "#86efac";
+      } else {
+        statusText.style.color = "#cbd5e1";
+      }
+    }
+
+    function requestGeolocation() {
+      // Reset inputs & UI
+      latInput.value = "";
+      lonInput.value = "";
+      coordsBox.style.display = "none";
+      updateStatus("⏳ Requesting GPS permission from your browser...");
+
+      if (!navigator.geolocation) {
+        updateStatus("❌ Geolocation is not supported by your browser.", false, true);
+        enableSmsWithoutLocation();
+        return;
+      }
+
+      const geoOptions = {
+        enableHighAccuracy: true,
+        timeout: 8000,
+        maximumAge: 0
+      };
+
+      navigator.geolocation.getCurrentPosition(
+        function (position) {
+          const lat = position.coords.latitude.toFixed(6);
+          const lon = position.coords.longitude.toFixed(6);
+          const accuracy = Math.round(position.coords.accuracy);
+
+          latInput.value = lat;
+          lonInput.value = lon;
+
+          updateStatus(`✅ GPS Coordinates Locked (Accuracy: ±${accuracy}m)`, true, false);
+          coordsText.innerText = `Lat: ${lat}, Lon: ${lon}`;
+          mapLink.href = `https://maps.google.com/?q=${lat},${lon}`;
+          coordsBox.style.display = "block";
+
+          smsButton.disabled = false;
+          if (lang === 'te') {
+            smsButton.innerText = "🛰 లొకేషన్‌తో SMS అలర్ట్ పంపు";
+          } else if (lang === 'hi') {
+            smsButton.innerText = "🛰 GPS स्थान के साथ SMS अलर्ट भेजें";
+          } else {
+            smsButton.innerText = "🛰 Send SMS Alert with GPS Location";
+          }
+        },
+        function (error) {
+          let errorMsg = "⚠️ Location unavailable.";
+          switch (error.code) {
+            case error.PERMISSION_DENIED:
+              errorMsg = "⚠️ Location permission denied. You can still send an alert without coordinates.";
+              break;
+            case error.POSITION_UNAVAILABLE:
+              errorMsg = "⚠️ GPS position unavailable. Signal may be weak.";
+              break;
+            case error.TIMEOUT:
+              errorMsg = "⏱ GPS request timed out. You can retry or send without location.";
+              break;
+          }
+          updateStatus(errorMsg, false, true);
+          enableSmsWithoutLocation();
+        },
+        geoOptions
+      );
+
+      // Safety fallback: never keep user locked out of sending emergency SMS
+      setTimeout(() => {
+        if (smsButton.disabled) {
+          enableSmsWithoutLocation();
+        }
+      }, 5000);
+    }
+
+    function enableSmsWithoutLocation() {
+      smsButton.disabled = false;
+      if (lang === 'te') {
+        smsButton.innerText = "🛰 SMS అలర్ట్ పంపు (లొకేషన్ లేకుండా)";
+      } else if (lang === 'hi') {
+        smsButton.innerText = "🛰 SMS अलर्ट भेजें (स्थान के बिना)";
+      } else {
+        smsButton.innerText = "🛰 Send SMS Alert (Without Coordinates)";
+      }
+    }
+
+    // Auto-request location on page load
+    window.addEventListener("DOMContentLoaded", requestGeolocation);
+  </script>
+</body>
+</html>

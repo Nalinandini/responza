@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Responza — Emergency Response System</title>
+  <style>
+    body {
+      margin: 0;
+      background: radial-gradient(circle at center, #1f293d 0%, #0b0f19 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: #ffffff;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      text-align: center;
+      padding: 1rem;
+      box-sizing: border-box;
+    }
+
+    .splash-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: fadeIn 0.8s ease-in-out;
+    }
+
+    .logo-container {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      overflow: hidden;
+      box-shadow: 0 0 35px rgba(220, 38, 38, 0.45);
+      margin-bottom: 1.5rem;
+      border: 3px solid rgba(239, 68, 68, 0.8);
+      background: #000;
+    }
+
+    .logo-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin: 0 0 0.5rem 0;
+      color: #ffffff;
+    }
+
+    h1 span {
+      color: #ef4444;
+    }
+
+    p {
+      color: #94a3b8;
+      font-size: 1rem;
+      margin: 0 0 1.8rem 0;
+    }
+
+    .enter-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+      color: white;
+      text-decoration: none;
+      padding: 0.75rem 1.8rem;
+      border-radius: 9999px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4);
+      transition: all 0.25s ease;
+    }
+
+    .enter-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(220, 38, 38, 0.6);
+    }
+
+    .loader {
+      width: 28px;
+      height: 28px;
+      border: 3px solid rgba(255, 255, 255, 0.2);
+      border-top-color: #ef4444;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-top: 1.2rem;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
+  <script>
+    setTimeout(() => {
+      window.location.href = "/home";
+    }, 2000);
+  </script>
+</head>
+<body>
+  <div class="splash-card">
+    <div class="logo-container">
+      <img src="{{ url_for('static', filename='responza_logo.gif') }}" alt="Responza Logo">
+    </div>
+    <h1>Respon<span>za</span> 🚑</h1>
+    <p>Your Safety, Our Priority. Fast Emergency Assistance.</p>
+    <a href="/home" class="enter-btn">Enter Responza &rarr;</a>
+    <div class="loader" aria-label="Loading..."></div>
+  </div>
+</body>
+</html>

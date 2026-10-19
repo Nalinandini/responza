@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="{{ language or 'en' }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Responza — Alert Status</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container {% if not is_success %}container-dark{% endif %}">
+    {% if is_success %}
+      <div class="alert-box alert-success">
+        <h2 style="color: #065f46; margin-bottom: 0.5rem;">
+          {{ success_message }}
+        </h2>
+        <p style="font-size: 0.95rem; margin-top: 0.5rem;">
+          {% if language == 'te' %}హెచ్చరిక విజయవంతంగా పంపబడింది:
+          {% elif language == 'hi' %}चेतावनी सफलतापूर्वक भेजी गई:
+          {% else %}Emergency alert dispatched to:
+          {% endif %}
+          <br>
+          <strong style="font-size: 1.1rem; color: #1f2937;">{{ phone_number }}</strong>
+        </p>
+
+        {% if location_url and "maps.google.com" in location_url %}
+          <div style="margin-top: 0.8rem; font-size: 0.85rem;">
+            📍 <a href="{{ location_url }}" target="_blank" rel="noopener noreferrer" style="color: #0288d1; font-weight: 600;">
+              {% if language == 'te' %}జతచేయబడిన లొకేషన్‌ను చూడండి
+              {% elif language == 'hi' %}संलग्न स्थान देखें
+              {% else %}View attached location on map
+              {% endif %}
+            </a>
+          </div>
+        {% else %}
+          <p style="margin-top: 0.5rem; font-size: 0.85rem; color: #6b7280;">
+            {% if language == 'te' %}లొకేషన్ సమాచారం లేకుండా హెచ్చరిక పంపబడింది.
+            {% elif language == 'hi' %}स्थान विवरण के बिना चेतावनी भेजी गई।
+            {% else %}Alert dispatched without GPS coordinates.
+            {% endif %}
+          </p>
+        {% endif %}
+      </div>
+    {% else %}
+      <div class="alert-box alert-error">
+        <h2 style="color: #991b1b; margin-bottom: 0.5rem;">
+          {% if language == 'te' %}⚠️ SMS హెచ్చరిక పంపడంలో సమస్య ఏర్పడింది
+          {% elif language == 'hi' %}⚠️ SMS अलर्ट भेजने में असमर्थ
+          {% else %}⚠️ Unable to Dispatch Automatic SMS
+          {% endif %}
+        </h2>
+        <p style="font-size: 0.95rem; margin-top: 0.5rem; line-height: 1.5;">
+          {{ error_message }}
+        </p>
+      </div>
+
+      <div style="margin-bottom: 1.5rem;">
+        <p style="color: #fca5a5; font-weight: 600; margin-bottom: 0.75rem;">
+          {% if language == 'te' %}దయచేసి క్రింది నంబర్‌కు నేరుగా కాల్ చేయండి:
+          {% elif language == 'hi' %}कृपया सीधे आपातकालीन नंबर पर कॉल करें:
+          {% else %}Please call emergency services directly:
+          {% endif %}
+        </p>
+        <a class="btn btn-call" href="{{ call_link or 'tel:108' }}">
+          📞 
+          {% if language == 'te' %}తక్షణ అత్యవసర కాల్ (108)
+          {% elif language == 'hi' %}तुरंत आपातकालीन कॉल करें (108)
+          {% else %}Call Emergency Services (108)
+          {% endif %}
+        </a>
+      </div>
+    {% endif %}
+
+    <div class="button-stack">
+      <a class="btn btn-secondary" href="/home">
+        {{ back_message or '⬅ Back to Home' }}
+      </a>
+      <a class="btn btn-sms" href="/history">
+        📜 
+        {% if language == 'te' %}సంఘటనల చరిత్రను చూడండి
+        {% elif language == 'hi' %}घटना इतिहास देखें
+        {% else %}View Incident Log
+        {% endif %}
+      </a>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="{{ language or 'en' }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Responza — Emergency Response System</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <div class="logo-header">
+      <img src="{{ url_for('static', filename='responza_logo.gif') }}" alt="Responza Logo" class="logo-img">
+      <h1 style="margin-top: 0.8rem;">
+        {% if language == 'te' %}మీ భద్రత మా ప్రాధాన్యత 🚑
+        {% elif language == 'hi' %}आपकी सुरक्षा हमारी प्राथमिकता 🚑
+        {% else %}Your Safety, Our Priority 🚑
+        {% endif %}
+      </h1>
+      <p class="subtitle">
+        {% if language == 'te' %}తక్షణ అత్యవసర సహాయం మరియు మార్గదర్శనం
+        {% elif language == 'hi' %}त्वरित आपातकालीन सहायता और मार्गदर्शन
+        {% else %}Immediate Emergency Assistance & Guidance
+        {% endif %}
+      </p>
+    </div>
+
+    <!-- Language Selection Form (Posts to /home) -->
+    <form method="POST" action="/home" id="languageForm">
+      <label for="language">
+        {% if language == 'te' %}భాషను ఎంచుకోండి:
+        {% elif language == 'hi' %}भाषा चुनें:
+        {% else %}Select Language:
+        {% endif %}
+      </label>
+      <select name="language" id="language" onchange="document.getElementById('languageForm').submit();">
+        <option value="en" {% if language == 'en' or not language %}selected{% endif %}>🇬🇧 English</option>
+        <option value="te" {% if language == 'te' %}selected{% endif %}>🇮🇳 తెలుగు (Telugu)</option>
+        <option value="hi" {% if language == 'hi' %}selected{% endif %}>🇮🇳 हिन्दी (Hindi)</option>
+      </select>
+    </form>
+
+    <!-- Emergency Selection Form -->
+    <form action="/handle_emergency" method="POST">
+      <input type="hidden" name="language" value="{{ language or 'en' }}">
+
+      <label for="emergency">
+        {% if language == 'te' %}అత్యవసర పరిస్థితిని ఎంచుకోండి:
+        {% elif language == 'hi' %}आपातकालीन स्थिति चुनें:
+        {% else %}Select Emergency Situation:
+        {% endif %}
+      </label>
+      <select name="emergency" id="emergency" required {% if not emergency_list %}disabled{% endif %}>
+        {% if not emergency_list %}
+          <option value="" selected disabled>🚨 Select language first</option>
+        {% else %}
+          <option value="" selected disabled>
+            {% if language == 'te' %}🚨 మీ అత్యవసర పరిస్థితిని ఎంచుకోండి
+            {% elif language == 'hi' %}🚨 अपनी आपात स्थिति चुनें
+            {% else %}🚨 Choose your emergency situation
+            {% endif %}
+          </option>
+          {% for key in emergency_list %}
+            <option value="{{ key }}">{{ key }}</option>
+          {% endfor %}
+        {% endif %}
+      </select>
+
+      <button type="submit" class="btn btn-primary" {% if not emergency_list %}disabled{% endif %}>
+        {% if language == 'te' %}🆘 సహాయం పొందండి
+        {% elif language == 'hi' %}🆘 सहायता प्राप्त करें
+        {% else %}🆘 Get Emergency Help
+        {% endif %}
+      </button>
+    </form>
+
+    <div style="margin-top: 1.5rem; display: flex; justify-content: space-between; font-size: 0.85rem;">
+      <a href="/" class="nav-link" style="margin-top: 0;">⬅ Splash Screen</a>
+      <a href="/history" class="nav-link" style="margin-top: 0;">📜 Incident History</a>
+    </div>
+  </div>
+</body>
+</html>
